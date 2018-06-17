@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>私有Pods的创建 | 时光荏苒</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="程序员" />
+  
+
+  <meta name="description" content="##私有Pods##   &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; Cocoapods是非常好用的一个iOS依赖管理工具，使用它可以方便的管理和更新项目中所使用到的第三方库，以及将自己的项目中的公共组件。 1.创建并设置一个私有的Spec Repo2.创建Pod的所需要的项目并上传代码3.创建Pod所对应的podspec文件4.将.podspec提交到spec库中5">
+<meta property="og:type" content="article">
+<meta property="og:title" content="私有Pods的创建">
+<meta property="og:url" content="https://fanncyii.github.io/2017/04/17/私有Pods的创建/index.html">
+<meta property="og:site_name" content="时光荏苒">
+<meta property="og:description" content="##私有Pods##   &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; Cocoapods是非常好用的一个iOS依赖管理工具，使用它可以方便的管理和更新项目中所使用到的第三方库，以及将自己的项目中的公共组件。 1.创建并设置一个私有的Spec Repo2.创建Pod的所需要的项目并上传代码3.创建Pod所对应的podspec文件4.将.podspec提交到spec库中5">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://fanncyii.github.io/2017/04/17/私有Pods的创建/image/pods.png">
+<meta property="og:updated_time" content="2018-06-17T04:19:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="私有Pods的创建">
+<meta name="twitter:description" content="##私有Pods##   &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; Cocoapods是非常好用的一个iOS依赖管理工具，使用它可以方便的管理和更新项目中所使用到的第三方库，以及将自己的项目中的公共组件。 1.创建并设置一个私有的Spec Repo2.创建Pod的所需要的项目并上传代码3.创建Pod所对应的podspec文件4.将.podspec提交到spec库中5">
+<meta name="twitter:image" content="https://fanncyii.github.io/2017/04/17/私有Pods的创建/image/pods.png">
+
+  
+
+  
+    <link rel="icon" href="/longmao.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbe6" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+  
+
+
+  
+    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">To</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">To</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/category"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/about"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7"><span class="toc-text"></span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-私有Pods的创建" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">私有Pods的创建</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2017.04.17</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>Kivan</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/category/tools/">tools</a>
+  </span>
+
+
+
+      
+        <span>
+          <i class="icon-comment"></i>
+          <a href="https://fanncyii.github.io//2017/04/17/私有Pods的创建/#disqus_thread"></a>
+        </span>
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <p>##私有Pods##</p>
+<p>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Cocoapods是非常好用的一个iOS依赖管理工具，使用它可以方便的管理和更新项目中所使用到的第三方库，以及将自己的项目中的公共组件。</p>
+<p><a href="#1">1.创建并设置一个私有的Spec Repo</a><br><a href="#2">2.创建Pod的所需要的项目并上传代码</a><br><a href="#3">3.创建Pod所对应的podspec文件</a><br><a href="#4">4.将.podspec提交到spec库中</a><br><a href="#5">5.私有库的使用</a><br><a href="#6">6.扩展</a><br><a href="#7">7.讨论</a> </p>
+<p><img src="./image/pods.png" alt="cocoapods spec repo"></p>
+<h2 id="1"></h2>
+
+<ul>
+<li><strong>1.创建并设置一个私有的<code>Spec Repo</code></strong></li>
+</ul>
+<p><code>Spec Repo</code>是所有的Pods的一个索引，就是一个容器，所有公开的<code>Pods</code>都在这个里面（说白了就是一个存储着很多<code>Pods</code>的远程仓库）      </p>
+<p>使用了<code>Cocoapods</code>后它会被clone到本地的<code>~/.cocoapods/repos</code>目录下，可以进入到这个目录看到<code>master</code>文件夹就是这个官方的<code>Spec Repo</code>了。[注：a)自己搭建<code>Git</code>;   b)直接使用<code>GitHub</code> ]</p>
+<blockquote>
+<p>使用命令：<br><code>pod repo add MallSpecs git@10.211.55.3:MallSpecs/MallSpecs.git</code> </p>
+</blockquote>
+<p>成功的话进入到~/.cocoapods/repos目录下就可以看到<code>MallSpecs</code>这个目录了。至此第一步创建私有Spec Repo完成。</p>
+<p></p><h2 id="2"></h2>  <p></p>
+<ul>
+<li><strong>2.创建<code>Pod</code>的所需要的项目并上传代码</strong></li>
+</ul>
+<blockquote>
+<p><code>git init</code><br><code>git remote add origin git@10.211.55.3:MallBase/MallBase.git</code><br><code>git add .</code><br><code>git commit -m &quot;xxxxx&quot;</code><br><code>git push -u origin master</code>     </p>
+</blockquote>
+<p>上传代码后需要设置好版本tag：</p>
+<blockquote>
+<p><code>$ git tag -m &quot;first release&quot; 0.1.0</code><br><code>$ git push --tags     #推送tag到远端仓库</code></p>
+</blockquote>
+<blockquote>
+<p>GitHub上的命令：<br><code>git tag -a 1.0.0 -m &quot;Tag release 1.0.0&quot;</code><br><code>git push --tags</code></p>
+</blockquote>
+<p></p><h2 id="3"></h2><p></p>
+<ul>
+<li><strong>3.创建<code>Pod</code>所对应的<code>podspec</code>文件</strong>  </li>
+</ul>
+<blockquote>
+<p>生成<code>.podspec</code>文件使用命令：<code>pod spec create MallBase git@10.211.55.3:MyMall/MyMallBase.git</code>  </p>
+</blockquote>
+<p>执行完后会生成<code>MallBase.spec</code>文件，注意这里的.spec文件名必须和工程文件名一样。  </p>
+<blockquote>
+<p>验证spec文件正确性：<code>pod lib lint</code><br>忽略警告：<code>pod lib lint --allow-warnings</code><br><code>pod lib lint  --verbose --allow-warnings --sources=ssh://git@10.14.160.107:9022/WHJD/WHSpecs.git,git@git.jd.com:WHIOS/WHJDSpecs.git,git@github.com:CocoaPods/Specs.git</code></p>
+</blockquote>
+<p></p><h2 id="4"></h2><p></p>
+<ul>
+<li><strong>4.将.podspec提交到spec库中</strong></li>
+</ul>
+<p>向<code>Spec</code>库提交<code>podspec</code>文件前<code>podspec</code>必须通过验证无误。提交后  <code>~/.cocoapods/repos</code> 中的spec库文件夹中就会出现提交的.podspec文件。  </p>
+<blockquote>
+<p> 使用命令：<code>pod repo push MallSpecs MallBase.podspec</code><br> 忽略警告：<code>pod repo push MallSpecs MallBase.podspec --allow-warnings</code></p>
+</blockquote>
+<p></p><h2 id="5"></h2><p></p>
+<ul>
+<li><strong>5.私有库的使用</strong></li>
+</ul>
+<p>首先，在<code>podfile</code>文件中添加私有库源。</p>
+<blockquote>
+<p><code>source &#39;git@10.211.55.3:MallBase/MallBase.git&#39;</code></p>
+</blockquote>
+<p>接着就和其他cocoapods库的使用一样了：</p>
+<blockquote>
+<p><code>pod ‘MallBase’ ,’-&gt;0.1.0’</code></p>
+</blockquote>
+<p></p><h2 id="6"></h2><p></p>
+<ul>
+<li><p><strong>6.扩展</strong>   </p>
+<p>#####1）公有<code>pods</code> ####</p>
+<ul>
+<li><ol>
+<li>注册<code>trunk</code><br><code>$ pod trunk register useremail@xxxx.com &#39;password&#39;  --verbose</code><br><code>$ pod trunk me</code>  </li>
+</ol>
+</li>
+<li><ol start="2">
+<li>创建podspec文件  </li>
+</ol>
+</li>
+<li><ol start="3">
+<li>将<code>podspec</code>文件通过<code>trunk</code>推送给<code>CocoaPods</code>服务器<br><code>$ pod trunk push demo.podspec</code></li>
+</ol>
+</li>
+<li><ol start="4">
+<li>开始使用</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p><code>Github</code> 公有<code>Spec Reop</code> ：<a href="https://github.com/CocoaPods/Specs" target="_blank" rel="noopener">https://github.com/CocoaPods/Specs</a></p>
+</blockquote>
+<p>#####2）其他 ####</p>
+<blockquote>
+<p>项目管理</p>
+</blockquote>
+</li>
+</ul>
+<p></p><h2 id="7"></h2><p></p>
+<ul>
+<li><strong>7.讨论</strong></li>
+</ul>
+<p>##<center>Thanks</center>##</p>
+
+    
+  </div>
+
+  
+      <div class="git"></div>
+  
+
+</article>
+
+
+   
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2017/04/14/Block浅析/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2017/05/17/AutoReleasePool实现原理/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/category"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/about"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'kivan';
+    
+    var disqus_url = 'https://fanncyii.github.io/2017/04/17/私有Pods的创建/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//kivan.disqus.com/count.js" async></script>
+
+
+
+    
+    
+
+    
+    
+
+    
+
+    
+    
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+    <div id="comment" class="vcomment" ></div>
+    <script>
+        var notify = 'false' == true ? true : false;
+        var verify = 'false' == true ? true : false;
+        var GUEST_INFO = ['nick','mail','link'];
+        var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+            return GUEST_INFO.indexOf(item) > -1
+        });
+        guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+        window.valine = new Valine({
+            el: '.vcomment',
+            notify: notify,
+            verify: verify,
+            appId: "",
+            appKey: "",
+            avatar:'mm',
+            placeholder: "Just go go",
+            guest_info:guest_info,
+            pageSize:'10'
+        });
+    </script>
+  
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>
