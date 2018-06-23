@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="时光荏苒">
 <meta property="og:description" content="概要初始化weak变量的时候会调用storeWeak，后会先在全局列表SideTables中找到该变量指针指向的对象的weak_table_t 再通过weak_table_t获取对应该对象的若引用表实体weak_entry_t（每个weak_entry_t都包含对象地址和对应该对象的弱引用表），之后会释放删除旧对象的弱引用表中的变量指针，并在新对象的弱引用表中注册该变量指针。而对象释放的时候也会调">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-06-23T06:05:25.539Z">
+<meta property="og:updated_time" content="2018-06-23T06:08:21.613Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="weak实现原理">
 <meta name="twitter:description" content="概要初始化weak变量的时候会调用storeWeak，后会先在全局列表SideTables中找到该变量指针指向的对象的weak_table_t 再通过weak_table_t获取对应该对象的若引用表实体weak_entry_t（每个weak_entry_t都包含对象地址和对应该对象的弱引用表），之后会释放删除旧对象的弱引用表中的变量指针，并在新对象的弱引用表中注册该变量指针。而对象释放的时候也会调">
