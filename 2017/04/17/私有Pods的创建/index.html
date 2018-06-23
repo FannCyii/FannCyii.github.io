@@ -23,7 +23,7 @@
 <meta property="og:description" content="##私有Pods##   &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; Cocoapods是非常好用的一个iOS依赖管理工具，使用它可以方便的管理和更新项目中所使用到的第三方库，以及将自己的项目中的公共组件。 1.创建并设置一个私有的Spec Repo2.创建Pod的所需要的项目并上传代码3.创建Pod所对应的podspec文件4.将.podspec提交到spec库中5">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="https://fanncyii.github.io/2017/04/17/私有Pods的创建/image/pods.png">
-<meta property="og:updated_time" content="2018-06-19T14:18:56.000Z">
+<meta property="og:updated_time" content="2018-06-23T06:03:46.323Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="私有Pods的创建">
 <meta name="twitter:description" content="##私有Pods##   &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; Cocoapods是非常好用的一个iOS依赖管理工具，使用它可以方便的管理和更新项目中所使用到的第三方库，以及将自己的项目中的公共组件。 1.创建并设置一个私有的Spec Repo2.创建Pod的所需要的项目并上传代码3.创建Pod所对应的podspec文件4.将.podspec提交到spec库中5">
@@ -128,7 +128,7 @@
 
   <div id="toc" class="toc-article">
     <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7"><span class="toc-text"></span></a></li></ol>
+    <ol class="toc"><li class="toc-item toc-level-5"><a class="toc-link" href="#1）公有pods"><span class="toc-text">1）公有pods</span></a></li></ol>
   </div>
 
 
@@ -183,21 +183,79 @@
 <p>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Cocoapods是非常好用的一个iOS依赖管理工具，使用它可以方便的管理和更新项目中所使用到的第三方库，以及将自己的项目中的公共组件。</p>
 <p><a href="#1">1.创建并设置一个私有的Spec Repo</a><br><a href="#2">2.创建Pod的所需要的项目并上传代码</a><br><a href="#3">3.创建Pod所对应的podspec文件</a><br><a href="#4">4.将.podspec提交到spec库中</a><br><a href="#5">5.私有库的使用</a><br><a href="#6">6.扩展</a><br><a href="#7">7.讨论</a> </p>
 <p><img src="./image/pods.png" alt="cocoapods spec repo"></p>
-<h2 id="1"></h2>
-
-<ul>
-<li><strong>1.创建并设置一个私有的<code>Spec Repo</code></strong></li>
-</ul>
+<p><strong>1.创建并设置一个私有的<code>Spec Repo</code></strong></p>
 <p><code>Spec Repo</code>是所有的Pods的一个索引，就是一个容器，所有公开的<code>Pods</code>都在这个里面（说白了就是一个存储着很多<code>Pods</code>的远程仓库）      </p>
 <p>使用了<code>Cocoapods</code>后它会被clone到本地的<code>~/.cocoapods/repos</code>目录下，可以进入到这个目录看到<code>master</code>文件夹就是这个官方的<code>Spec Repo</code>了。[注：a)自己搭建<code>Git</code>;   b)直接使用<code>GitHub</code> ]</p>
 <blockquote>
 <p>使用命令：<br><code>pod repo add MallSpecs git@192.168.10.3:MallSpecs/MallSpecs.git</code> </p>
 </blockquote>
-<p>成功的话进入到~/.cocoapods/repos目录下就可以看到<code>MallSpecs</code>这个目录了。至此第一步创建私有Spec Repo完成。</p>
-<h2 id="2"></h2><br>- <strong>2.创建<code>Pod</code>的所需要的项目并上传代码</strong><br><br>&gt; <code>git init</code><br>&gt; <code>git remote add origin git@192.168.10.3:MallBase/MallBase.git</code><br>&gt; <code>git add .</code><br>&gt; <code>git commit -m &quot;xxxxx&quot;</code><br>&gt; <code>git push -u origin master</code><br><br>上传代码后需要设置好版本tag：<br>&gt;<code>$ git tag -m &quot;first release&quot; 0.1.0</code><br>&gt;<code>$ git push --tags     #推送tag到远端仓库</code><br><br>&gt;GitHub上的命令：<br>&gt; <code>git tag -a 1.0.0 -m &quot;Tag release 1.0.0&quot;</code><br>&gt; <code>git push --tags</code><br><br><br><h2 id="3"></h2><br>- <strong>3.创建<code>Pod</code>所对应的<code>podspec</code>文件</strong><br><br>&gt; 生成<code>.podspec</code>文件使用命令：<code>pod spec create MallBase git@192.168.10.3:MyMall/MyMallBase.git</code><br><br>执行完后会生成<code>MallBase.spec</code>文件，注意这里的.spec文件名必须和工程文件名一样。<br> &gt; 验证spec文件正确性：<code>pod lib lint</code><br>  &gt;忽略警告：<code>pod lib lint --allow-warnings</code><br>  &gt;<code>pod lib lint  --verbose --allow-warnings --sources=ssh://git@xx.xx.xx.107:9022/xx/KISpecs.git,git@xxxx.com:xxxx/KIVSpecs.git,git@github.com:CocoaPods/Specs.git</code><br><br><h2 id="4"></h2><br>- <strong>4.将.podspec提交到spec库中</strong><br><br>向<code>Spec</code>库提交<code>podspec</code>文件前<code>podspec</code>必须通过验证无误。提交后  <code>~/.cocoapods/repos</code> 中的spec库文件夹中就会出现提交的.podspec文件。<br>  &gt;  使用命令：<code>pod repo push MallSpecs MallBase.podspec</code><br>  &gt;  忽略警告：<code>pod repo push MallSpecs MallBase.podspec --allow-warnings</code><br><br><h2 id="5"></h2><br>- <strong>5.私有库的使用</strong><br><br>首先，在<code>podfile</code>文件中添加私有库源。<br><br>&gt;<code>source &#39;git@192.168.10.3:MallBase/MallBase.git&#39;</code><br><br>接着就和其他cocoapods库的使用一样了：<br>&gt;<code>pod ‘MallBase’ ,’-&gt;0.1.0’</code><br><br><h2 id="6"></h2><br>- <strong>6.扩展</strong><br><br> ##### 1）公有<code>pods</code><br>   <em> 1. 注册<code>trunk</code><br> <code>$ pod trunk register useremail@xxxx.com &#39;password&#39;  --verbose</code><br> <code>$ pod trunk me</code>  
-   </em> 2. 创建podspec文件<br>   <em> 3. 将<code>podspec</code>文件通过<code>trunk</code>推送给<code>CocoaPods</code>服务器<br>   <code>$ pod trunk push demo.podspec</code>
-   </em> 4. 开始使用<br><br> &gt;<code>Github</code> 公有<code>Spec Reop</code> ：<a href="https://github.com/CocoaPods/Specs" target="_blank" rel="noopener">https://github.com/CocoaPods/Specs</a><br><br> ##### 2）其他<br> &gt;项目管理<br><br><h2 id="7"></h2>
-
+<p>成功的话进入到<code>~/.cocoapods/repos</code>目录下就可以看到<code>MallSpecs</code>这个目录了。至此第一步创建私有<code>Spec Repo</code>完成。</p>
+<ul>
+<li><strong>2.创建<code>Pod</code>的所需要的项目并上传代码</strong>  </li>
+</ul>
+<blockquote>
+<p><code>git init</code><br><code>git remote add origin git@192.168.10.3:MallBase/MallBase.git</code><br><code>git add .</code><br><code>git commit -m &quot;xxxxx&quot;</code><br><code>git push -u origin master</code>     </p>
+</blockquote>
+<p>上传代码后需要设置好版本tag：</p>
+<blockquote>
+<p><code>$ git tag -m &quot;first release&quot; 0.1.0</code><br><code>$ git push --tags     #推送tag到远端仓库</code></p>
+</blockquote>
+<blockquote>
+<p>GitHub上的命令：<br><code>git tag -a 1.0.0 -m &quot;Tag release 1.0.0&quot;</code><br><code>git push --tags</code></p>
+</blockquote>
+<ul>
+<li><strong>3.创建<code>Pod</code>所对应的<code>podspec</code>文件</strong>  </li>
+</ul>
+<blockquote>
+<p>生成<code>.podspec</code>文件使用命令：<code>pod spec create MallBase git@192.168.10.3:MyMall/MyMallBase.git</code>  </p>
+</blockquote>
+<p>执行完后会生成<code>MallBase.spec</code>文件，注意这里的.spec文件名必须和工程文件名一样。  </p>
+<blockquote>
+<p>验证spec文件正确性：<code>pod lib lint</code><br>忽略警告：<code>pod lib lint --allow-warnings</code><br><code>pod lib lint  --verbose --allow-warnings --sources=ssh://git@xx.xx.xx.107:9022/xx/KISpecs.git,git@xxxx.com:xxxx/KIVSpecs.git,git@github.com:CocoaPods/Specs.git</code></p>
+</blockquote>
+<ul>
+<li><strong>4.将.podspec提交到spec库中</strong></li>
+</ul>
+<p>向<code>Spec</code>库提交<code>podspec</code>文件前<code>podspec</code>必须通过验证无误。提交后  <code>~/.cocoapods/repos</code> 中的spec库文件夹中就会出现提交的.podspec文件。  </p>
+<blockquote>
+<p> 使用命令：<code>pod repo push MallSpecs MallBase.podspec</code><br> 忽略警告：<code>pod repo push MallSpecs MallBase.podspec --allow-warnings</code></p>
+</blockquote>
+<ul>
+<li><strong>5.私有库的使用</strong></li>
+</ul>
+<p>首先，在<code>podfile</code>文件中添加私有库源。</p>
+<blockquote>
+<p><code>source &#39;git@192.168.10.3:MallBase/MallBase.git&#39;</code></p>
+</blockquote>
+<p>接着就和其他cocoapods库的使用一样了：</p>
+<blockquote>
+<p><code>pod ‘MallBase’ ,’-&gt;0.1.0’</code></p>
+</blockquote>
+<ul>
+<li><p><strong>6.扩展</strong>   </p>
+<h5 id="1）公有pods"><a href="#1）公有pods" class="headerlink" title="1）公有pods"></a>1）公有<code>pods</code></h5><ul>
+<li><ol>
+<li>注册<code>trunk</code><br><code>$ pod trunk register useremail@xxxx.com &#39;password&#39;  --verbose</code><br><code>$ pod trunk me</code>  </li>
+</ol>
+</li>
+<li><ol start="2">
+<li>创建podspec文件  </li>
+</ol>
+</li>
+<li><ol start="3">
+<li>将<code>podspec</code>文件通过<code>trunk</code>推送给<code>CocoaPods</code>服务器<br><code>$ pod trunk push demo.podspec</code></li>
+</ol>
+</li>
+<li><ol start="4">
+<li>开始使用</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p><code>Github</code> 公有<code>Spec Reop</code> ：<a href="https://github.com/CocoaPods/Specs" target="_blank" rel="noopener">https://github.com/CocoaPods/Specs</a></p>
+</blockquote>
 
     
   </div>
