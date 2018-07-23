@@ -23,7 +23,7 @@
 <meta property="og:site_name" content="时光荏苒">
 <meta property="og:description" content="概要 1 @autoreleasepool{}的底层表示 举个例子：直接写一个main.m文件：   12345#import &amp;lt;Foundation/Foundation.h&amp;gt;int main(int arg,char* args[])&amp;#123;	@autoreleasepool&amp;#123;	&amp;#125;&amp;#125; 使用clang -rewrite-objc main.m 将代码">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-06-24T14:04:26.216Z">
+<meta property="og:updated_time" content="2018-07-23T12:58:44.732Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AutoReleasePool实现原理">
 <meta name="twitter:description" content="概要 1 @autoreleasepool{}的底层表示 举个例子：直接写一个main.m文件：   12345#import &amp;lt;Foundation/Foundation.h&amp;gt;int main(int arg,char* args[])&amp;#123;	@autoreleasepool&amp;#123;	&amp;#125;&amp;#125; 使用clang -rewrite-objc main.m 将代码">
@@ -207,16 +207,87 @@
 <p>这三个函数就是与自动释放池对象的添加与释放的关键所在。</p>
 <h1 id="3-自动释放池的push操作"><a href="#3-自动释放池的push操作" class="headerlink" title="3 自动释放池的push操作"></a>3 自动释放池的<code>push</code>操作</h1><p><a href="#001">1<code>@autoreleasepool{}</code>的底层表示</a>中的<code>objc_autoreleasePoolPush</code>的实现如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">void * objc_autoreleasePoolPush(void)</span><br><span class="line">&#123;</span><br><span class="line">    return AutoreleasePoolPage::push();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>其调用的就是AutoreleasePoolPage类的push方法。下面具体实现：</p>
+<p>其调用的就是AutoreleasePoolPage的类函数push。下面具体实现：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">static inline void *push() </span><br><span class="line">&#123;</span><br><span class="line">    id *dest;</span><br><span class="line">    if (DebugPoolAllocation) &#123;</span><br><span class="line">        // Each autorelease pool starts on a new pool page.</span><br><span class="line">        dest = autoreleaseNewPage(POOL_BOUNDARY);</span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        dest = autoreleaseFast(POOL_BOUNDARY);</span><br><span class="line">    &#125;</span><br><span class="line">    assert(dest == EMPTY_POOL_PLACEHOLDER || *dest == POOL_BOUNDARY);</span><br><span class="line">    return dest;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>可见创建自动释放池就是调用<code>autoreleaseNewPage</code> 或 <code>autoreleaseFast</code>,传入的参数就是<code>POOL_BOUNDARY</code>宏(看这个宏的字面意思可以知道就是池的边界，可以理解为新的自动释放池的开始)。通过源代码可以看到，这两个函数最后都是调用如下两个函数：</p>
+<p>可见创建自动释放池就是调用<code>autoreleaseNewPage</code> 或 <code>autoreleaseFast</code>：</p>
+<blockquote>
+<p>1 <code>autoreleaseNewPage</code> 创建新的page，当新建自动释放池的时候调用。新建自动释池的时候调用，每个新自动释放池都新建一个<code>pool page</code>来开头<br>2 <code>autoreleaseFast</code> 创建新的page，当自动释放池的当前hotpage满了时候，会给当前池，拓展新<code>pool page</code>.</p>
+</blockquote>
+<p>源码如下：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">    static __attribute__((noinline))</span><br><span class="line">    id *autoreleaseNewPage(id obj)</span><br><span class="line">    &#123;</span><br><span class="line">        AutoreleasePoolPage *page = hotPage();</span><br><span class="line">        if (page) return autoreleaseFullPage(obj, page);</span><br><span class="line">        else return autoreleaseNoPage(obj);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    static inline id *autoreleaseFast(id obj)</span><br><span class="line">    &#123;</span><br><span class="line">        AutoreleasePoolPage *page = hotPage();</span><br><span class="line">        if (page &amp;&amp; !page-&gt;full()) &#123;</span><br><span class="line">            return page-&gt;add(obj);</span><br><span class="line">        &#125; else if (page) &#123;</span><br><span class="line">            return autoreleaseFullPage(obj, page);</span><br><span class="line">        &#125; else &#123;</span><br><span class="line">            return autoreleaseNoPage(obj);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">传入的参数就是`POOL_BOUNDARY`宏(看这个宏的字面意思可以知道就是池的边界，如果是新建的池，则可以理解为池的开始，宏定义为`#   define POOL_BOUNDARY nil`)。整个函数返回一个地址变量dest。通过源代码可以看到，这两个函数最后都是调用如下两个函数：</span><br><span class="line"></span><br><span class="line">*     `static __attribute__((noinline))</span><br><span class="line">    id *autoreleaseFullPage(id obj, AutoreleasePoolPage *page)`  </span><br><span class="line">*  `    static __attribute__((noinline))</span><br><span class="line">    id *autoreleaseNoPage(id obj)`</span><br><span class="line">    </span><br><span class="line">`函数autoreleaseFullPage`：如果当前自动释放池没有满，则将对象添加到当前释放池的最后没有满的page中。如果满了则新建一个再添加。源码如下：</span><br></pre></td></tr></table></figure>
+<pre><code>id *autoreleaseFullPage(id obj, AutoreleasePoolPage *page)
+{
+    // The hot page is full. 
+    // Step to the next non-full page, adding a new page if necessary.
+    // Then add the object to that page.
+    assert(page == hotPage());
+    assert(page-&gt;full()  ||  DebugPoolAllocation);
+
+    do {
+        if (page-&gt;child) page = page-&gt;child;
+        else page = new AutoreleasePoolPage(page);
+    } while (page-&gt;full());
+
+    setHotPage(page);
+    return page-&gt;add(obj);
+}
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">`函数autoreleaseNoPage`：部分代码如下：</span><br></pre></td></tr></table></figure>
+<p>…<br>        // We are pushing an object or a non-placeholder’d pool.</p>
+<pre><code>// Install the first page.
+AutoreleasePoolPage *page = new AutoreleasePoolPage(nil);
+setHotPage(page);
+
+// Push a boundary on behalf of the previously-placeholder&apos;d pool.
+if (pushExtraBoundary) {
+    page-&gt;add(POOL_BOUNDARY);
+}
+
+// Push the requested object or pool.
+return page-&gt;add(obj);
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">## 4 自动释放池的`pop`操作</span><br><span class="line">在执行pop操作时，会传入一个token，这个token就是要退出的page边界。也就是说，执行pop时，会从最后一个pool page 沿着parent链对每个next链中的对象发送release请求，直到taken对象地址为止：</span><br></pre></td></tr></table></figure>
+<p>static inline void pop(void <em>token) {<br>…<br>stop = (id </em>)token;<br>…<br>page-&gt;releaseUntil(stop);<br>…</p>
+<p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">push 和 pop 两个操作就是像是入栈和出栈一样，在入栈时保持入栈的起点；出栈时将起点后如栈的的对象做release操作。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 5 自动释放池的`Autorelease`操作</span><br><span class="line">在ARC中 所有对象都默认加入到了该对象的当前自动释放池中，相当于MRC中手动调用了`autorelease `方法，对应源码中的方法如下：</span><br></pre></td></tr></table></figure>
+<pre><code>static inline id autorelease(id obj)
+{
+    assert(obj);
+    assert(!obj-&gt;isTaggedPointer());
+    id *dest __unused = autoreleaseFast(obj);
+    assert(!dest  ||  dest == EMPTY_POOL_PLACEHOLDER  ||  *dest == obj);
+    return obj;
+}
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">该方法调用了`autoreleaseFast`将对象加入到了当前自动释放池中，autoreleaseFast方法最终也是对`autoreleaseFullPage`或`autoreleaseNoPage`进行调用。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">## 6 RunLoop监控</span><br><span class="line"></span><br><span class="line">在App启动时，主线程的runloop中注册了两个Observer</span><br><span class="line"></span><br><span class="line">打印主线程`runloop`信息，查看`common mode`的第5和6个`item`如下：</span><br></pre></td></tr></table></figure>
+<pre><code>5 : &lt;CFRunLoopObserver 0x60400012b4a0 [0x106aa7bb0]&gt;{valid = Yes, activities = 0x1, repeats = Yes, order = -2147483647, callout = _wrapRunLoopWithAutoreleasePoolHandler (0x106c56276), context = &lt;CFArray 0x60400044b6d0 [0x106aa7bb0]&gt;{type = mutable-small, count = 1, values = (
+0 : &lt;0x7ff21a802048&gt;
+</code></pre><p>)}}<br>    6 : <cfrunloopobserver 0x60400012b540="" [0x106aa7bb0]="">{valid = Yes, activities = 0xa0, repeats = Yes, order = 2147483647, callout = _wrapRunLoopWithAutoreleasePoolHandler (0x106c56276), context = <cfarray 0x60400044b6d0="" [0x106aa7bb0]="">{type = mutable-small, count = 1, values = (<br>    0 : <0x7ff21a802048><br>)}}</0x7ff21a802048></cfarray></cfrunloopobserver></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">分别可以看出这两个observer的优先级以及回调触发的阶段。</span><br><span class="line">分别在runloop的两个阶段 activities = 0x1和 activities=0xa0设置了进行监听阶段；设置回调函数都是_wrapRunLoopWithAutoreleasePoolHandler；优先级是order字段order。</span><br><span class="line">查看runloop活动阶段的定义如下：</span><br></pre></td></tr></table></figure>
+<p>typedef enum CFRunLoopActivity : CFOptionFlags {<br>    kCFRunLoopEntry = (1UL &lt;&lt; 0),//00000001<br>    kCFRunLoopBeforeTimers = (1UL &lt;&lt; 1),//00000010<br>    kCFRunLoopBeforeSources = (1UL &lt;&lt; 2),//00000100<br>    kCFRunLoopBeforeWaiting = (1UL &lt;&lt; 5),//00100000<br>    kCFRunLoopAfterWaiting = (1UL &lt;&lt; 6),//01000000<br>    kCFRunLoopExit = (1UL &lt;&lt; 7),    //10000000<br>    kCFRunLoopAllActivities = 0x0FFFFFFFU<br>} CFRunLoopActivity;</p>
+<p><code>`</code></p>
 <ul>
-<li><code>static __attribute__((noinline))
-id *autoreleaseFullPage(id obj, AutoreleasePoolPage *page)</code>  </li>
-<li><code>static __attribute__((noinline))
- id *autoreleaseNoPage(id obj)</code></li>
+<li><code>activities = 0x1</code> 转化成二进制是<code>00000001</code>表示<code>kCFRunLoopEntry</code>，说明是进入runloop时触发第5这个<code>observer</code></li>
+<li><code>activities = 0xa0</code> 转化成二进制是<code>10000000|00100000</code> 表示<code>kCFRunLoopBeforeWaiting|kCFRunLoopExit</code>，说明在runloop等待前和推出时会调用第6这个<code>observer</code></li>
 </ul>
-<p>—未完待续—</p>
+<p>说明(<a href="https://blog.ibireme.com/2015/05/18/runloop/" target="_blank" rel="noopener">参考</a>):</p>
+<blockquote>
+<p>App启动后，苹果在主线程 <code>RunLoop</code> 里注册了两个 <code>Observer</code>，其回调都是 <code>_wrapRunLoopWithAutoreleasePoolHandler()</code>。</p>
+</blockquote>
+<blockquote>
+<p>第一个 <code>Observer</code> 监视的事件是 <code>Entry</code>(即将进入<code>Loop</code>)，其回调内会调用 <code>_objc_autoreleasePoolPush()</code> 创建自动释放池。其 <code>order</code> 是-2147483647，优先级最高，保证创建释放池发生在其他所有回调之前。</p>
+</blockquote>
+<blockquote>
+<p>第二个 <code>Observer</code> 监视了两个事件： <code>BeforeWaiting</code>(准备进入休眠) 时调用<code>_objc_autoreleasePoolPop()</code> 和 <code>_objc_autoreleasePoolPush()</code> 释放旧的池并创建新池；<code>Exit</code>(即将退出<code>Loop</code>) 时调用 <code>_objc_autoreleasePoolPop()</code> 来释放自动释放池。这个 <code>Observer</code> 的 <code>order</code> 是 2147483647，优先级最低，保证其释放池子发生在其他所有回调之后。</p>
+</blockquote>
+<blockquote>
+<p>在主线程执行的代码，通常是写在诸如事件回调、<code>Timer</code>回调内的。这些回调会被 <code>RunLoop</code> 创建好的 <code>AutoreleasePool</code> 环绕着，所以不会出现内存泄漏，开发者也不必显示创建 <code>Pool</code> 了。</p>
+</blockquote>
+<p>注： 还有一些知识没有搞明白：</p>
+<blockquote>
+<ol>
+<li>自动释放池做push操作返回的token对象是如何保存的,pop操作是如何获取到的这个token对象的。  </li>
+<li>自动释放池注册的两个通知在哪里可以看到源码，以及其回调函数的实现。  </li>
+<li>其他</li>
+</ol>
+</blockquote>
 
     
   </div>
