@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>Block的类型 | 时光荏苒</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="程序员" />
+  
+
+  <meta name="description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的变量都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Block的类型">
+<meta property="og:url" content="https://fanncyii.github.io/2018/08/12/Block的类型/index.html">
+<meta property="og:site_name" content="时光荏苒">
+<meta property="og:description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的变量都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-08-12T14:46:37.003Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Block的类型">
+<meta name="twitter:description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的变量都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
+
+  
+
+  
+    <link rel="icon" href="/longmao.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbe6" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+  
+
+
+  
+    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">To</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">To</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/category"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/about"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-栈中的Block"><span class="toc-text">1 栈中的Block</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-全局Block"><span class="toc-text">2 全局Block</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-堆中的Block"><span class="toc-text">3 堆中的Block</span></a></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-Block的类型" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">Block的类型</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2018.08.12</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>Kivan</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/category/iOS/">iOS</a>
+  </span>
+
+
+
+      
+        <span>
+          <i class="icon-comment"></i>
+          <a href="https://fanncyii.github.io//2018/08/12/Block的类型/#disqus_thread"></a>
+        </span>
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <table>
+<thead>
+<tr>
+<th>Block类型</th>
+<th>存储位置  </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_NSConcreteStackBlock</code></td>
+<td>栈</td>
+</tr>
+<tr>
+<td><code>_NSConcreteGlobalBlock</code></td>
+<td>数据区(.data)</td>
+</tr>
+<tr>
+<td><code>_NSConcreteMallocBlock</code></td>
+<td>堆</td>
+</tr>
+</tbody>
+</table>
+<h2 id="1-栈中的Block"><a href="#1-栈中的Block" class="headerlink" title="1 栈中的Block"></a>1 栈中的Block</h2><p>由于<code>OC</code>的内存管理机制，其创建的变量都保存在堆上。如当进入一个函数栈时，函数中使用<code>[[NSObject alloc] init]</code>创建的对象不是存放在栈上的，而是存放在堆上的,函数结束后使用ARC等机制释放掉不在使用的对象。但是有个例外就是<code>Block</code>，<code>Block</code>对象也可以作为<code>OC</code>对象，但是在函数中创建并捕获了自动变量的Block是存放在栈上的。所以如果<code>block</code>存储在栈中，那么当函数结束时，该<code>block</code>就会和函数栈一起释放掉。这样如果是栈<code>Block</code>就不会产生循环引用了。这也是为什么使用<code>Masonry</code>设置约束时<code>Block</code>里面直接使用<code>self</code>而不会导致循环引用的原因。</p>
+<h2 id="2-全局Block"><a href="#2-全局Block" class="headerlink" title="2 全局Block"></a>2 全局Block</h2><p>什么时候生成的Block是存储在数据区的呢？有两种情况：  </p>
+<blockquote>
+<ul>
+<li>在全局位置实现的Block的情况，也就在定义全局变量的位置定义的Block</li>
+<li>Block中并没有使用截获的自动变量的情况</li>
+</ul>
+</blockquote>
+<p>其实看着两种情况都是指的只要Block没有使用任何截获的变量，那么这个Block就存放在全局区，当然第一种情况就根本不会捕获到变量。</p>
+<h2 id="3-堆中的Block"><a href="#3-堆中的Block" class="headerlink" title="3 堆中的Block"></a>3 堆中的Block</h2><p>Block有一下情况就会拷贝到堆上</p>
+<blockquote>
+<ul>
+<li>调用Block的copy实例方法时</li>
+<li>Block作为函数返回值时</li>
+<li>将Block赋值给附有_strong修饰符id类型或Block类型成员变量时（在ARC中类属性使用copy和strong都是一样的效果，只是苹果建议使用copy）</li>
+<li>在方法名中有usingBlock的Cocoa框架方法或GCD的API中传递的Block时</li>
+</ul>
+</blockquote>
+<p>由于栈block和全局block入会形成循环引用，所以导致循环引用的也就是堆Block了。将Block存储在堆上也是为何Block能够超期存在的原因，也是循环引用的一个必要条件。</p>
+<p>当使用<code>__block</code>修饰变量时，系统会开辟新的内存空间形成一个专门存储<code>__block</code>变量的结构体,而该结构体会强引用赋值给<code>__block</code>变量的对象，当<code>Block</code>被拷贝到堆上时，相关的<code>__block</code>也会被拷贝到堆上,所以这里也可能会引起循环引用。如下代码： </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- (void)demoCycleReference</span><br><span class="line">&#123;</span><br><span class="line">    __block id tempSelf = self;</span><br><span class="line">    self.demoblock = ^&#123;</span><br><span class="line">        NSLog(@&quot;%@&quot;,tempSelf);</span><br><span class="line">        tempSelf = nil;</span><br><span class="line">    &#125;;</span><br><span class="line">    //self.demoblock()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里如果<code>self.demoblock()</code> 没有执行，那么就会导致循环引用,因为<code>__block</code>变量强引用了<code>tempself</code>对象，而block强引用<code>__block</code>变量，而<code>temself</code>又强引用了该<code>block</code>，最后导致引用循环。</p>
+
+    
+  </div>
+
+  
+      <div class="git"></div>
+  
+
+</article>
+
+
+   
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2018/08/12/Block的几种类型/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="hide pull-right" href="/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/category"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/about"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'kivan';
+    
+    var disqus_url = 'https://fanncyii.github.io/2018/08/12/Block的类型/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//kivan.disqus.com/count.js" async></script>
+
+
+
+    
+    
+
+    
+    
+
+    
+
+    
+    
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+    <div id="comment" class="vcomment" ></div>
+    <script>
+        var notify = 'false' == true ? true : false;
+        var verify = 'false' == true ? true : false;
+        var GUEST_INFO = ['nick','mail','link'];
+        var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+            return GUEST_INFO.indexOf(item) > -1
+        });
+        guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+        window.valine = new Valine({
+            el: '.vcomment',
+            notify: notify,
+            verify: verify,
+            appId: "",
+            appKey: "",
+            avatar:'mm',
+            placeholder: "Just go go",
+            guest_info:guest_info,
+            pageSize:'10'
+        });
+    </script>
+  
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>
