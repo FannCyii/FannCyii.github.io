@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+
+  <html class="light page-post">
+
+
+<head>
+  <meta charset="utf-8">
+  
+  <title>iOS所有权修饰符看内存管理 | 时光荏苒</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  
+    <meta name="keywords" content="程序员" />
+  
+
+  <meta name="description" content="内存管理   iOS内存管理主要使用的是引用计数机制，当分配的对象引用计数为0时就会被系统回收。分为MRC和ARC(手动管理引用计数 和 自动引用计数)，现在大多使用ARC。    那么分配的对象何时引用计数为0呢？这就需要了解引用计数和对象生成和释放的关系了。要注意某对象的引用计数是根据持有者的数量来看的，当某对象存持有者有n个时，那么它的引用计数就为n,当某个变量需要持有该段对象时，该内存引用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS所有权修饰符看内存管理">
+<meta property="og:url" content="https://fanncyii.github.io/2018/05/04/iOS所有权修饰符看内存管理/index.html">
+<meta property="og:site_name" content="时光荏苒">
+<meta property="og:description" content="内存管理   iOS内存管理主要使用的是引用计数机制，当分配的对象引用计数为0时就会被系统回收。分为MRC和ARC(手动管理引用计数 和 自动引用计数)，现在大多使用ARC。    那么分配的对象何时引用计数为0呢？这就需要了解引用计数和对象生成和释放的关系了。要注意某对象的引用计数是根据持有者的数量来看的，当某对象存持有者有n个时，那么它的引用计数就为n,当某个变量需要持有该段对象时，该内存引用">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-11-01T17:00:09.719Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS所有权修饰符看内存管理">
+<meta name="twitter:description" content="内存管理   iOS内存管理主要使用的是引用计数机制，当分配的对象引用计数为0时就会被系统回收。分为MRC和ARC(手动管理引用计数 和 自动引用计数)，现在大多使用ARC。    那么分配的对象何时引用计数为0呢？这就需要了解引用计数和对象生成和释放的关系了。要注意某对象的引用计数是根据持有者的数量来看的，当某对象存持有者有n个时，那么它的引用计数就为n,当某个变量需要持有该段对象时，该内存引用">
+
+  
+
+  
+    <link rel="icon" href="/longmao.ico">
+  
+
+  <link href="/css/styles.css?v=c114cbe6" rel="stylesheet">
+
+
+  
+    <link rel="stylesheet" href="/css/personal-style.css">
+  
+
+  
+
+  
+
+  
+
+
+  
+    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  
+
+  
+    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  
+</head>
+
+<body>
+
+
+  
+    <span id="toolbox-mobile" class="toolbox-mobile">To</span>
+  
+
+  <div class="post-header CENTER">
+   
+  <div class="toolbox">
+    <a class="toolbox-entry" href="/">
+      <span class="toolbox-entry-text">To</span>
+      <i class="icon-angle-down"></i>
+      <i class="icon-home"></i>
+    </a>
+    <ul class="list-toolbox">
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/archives/"
+            rel="noopener noreferrer"
+            target="_blank"
+            >
+            博客
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/category"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            分类
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/link/"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            友链
+          </a>
+        </li>
+      
+        <li class="item-toolbox">
+          <a
+            class="ROUND_RECT"
+            href="/about"
+            rel="noopener noreferrer"
+            target="_self"
+            >
+            关于
+          </a>
+        </li>
+      
+    </ul>
+  </div>
+
+
+</div>
+
+
+  <div id="toc" class="toc-article">
+    <strong class="toc-title">文章目录</strong>
+    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#内存管理"><span class="toc-text">内存管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#对象的生成与释放"><span class="toc-text">对象的生成与释放</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#对象生成"><span class="toc-text">对象生成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#对象释放"><span class="toc-text">对象释放</span></a></li></ol></li></ol>
+  </div>
+
+
+
+<div class="content content-post CENTER">
+   <article id="post-iOS所有权修饰符看内存管理" class="article article-type-post" itemprop="blogPost">
+  <header class="article-header">
+    <h1 class="post-title">iOS所有权修饰符看内存管理</h1>
+
+    <div class="article-meta">
+      <span>
+        <i class="icon-calendar"></i>
+        <span>2018.05.04</span>
+      </span>
+
+      
+        <span class="article-author">
+          <i class="icon-user"></i>
+          <span>Kivan</span>
+        </span>
+      
+
+      
+  <span class="article-category">
+    <i class="icon-list"></i>
+    <a class="article-category-link" href="/category/iOS/">iOS</a>
+  </span>
+
+
+
+      
+        <span>
+          <i class="icon-comment"></i>
+          <a href="https://fanncyii.github.io//2018/05/04/iOS所有权修饰符看内存管理/#disqus_thread"></a>
+        </span>
+      
+
+      
+      <i class="fa fa-eye"></i> 
+        <span id="busuanzi_container_page_pv">
+           &nbsp热度 <span id="busuanzi_value_page_pv">
+           <i class="fa fa-spinner fa-spin"></i></span>℃
+        </span>
+      
+      
+    </div>
+  </header>
+
+  <div class="article-content">
+    
+      <h3 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h3><p>   iOS内存管理主要使用的是引用计数机制，当分配的对象引用计数为0时就会被系统回收。分为MRC和ARC(手动管理引用计数 和 自动引用计数)，现在大多使用ARC。</p>
+<p>   那么分配的对象何时引用计数为0呢？这就需要了解引用计数和对象生成和释放的关系了。要注意某对象的引用计数是根据持有者的数量来看的，当某对象存持有者有n个时，那么它的引用计数就为n,当某个变量需要持有该段对象时，该内存引用计数加1，当某个持有者不在持有该对象时，该对象的引用计数就会减一。持有和释放要遵守如下思想：</p>
+<ul>
+<li>自己生成的对象，自己持有</li>
+<li>不是自己生成的对象，也可以持有，</li>
+<li>不再需要自己持有的对象时释放</li>
+<li>非自己持有的对象，无法释放</li>
+</ul>
+<p>遵守这四条思想就需要利用4中所有权修饰符：  </p>
+<ul>
+<li><p><strong>__strong</strong></p>
+<p>就是和对象建立一种强引用持续有关系，具体实现就是<code>retain</code>新对象，<code>release</code>旧对象。（可以自行查看<code>runtime</code>源码）  </p>
+</li>
+<li><p><strong>__weak</strong>  </p>
+<p>维护着一种弱引用关系，并不会改变对象的引用计数. 它主要有两个作用：<br>1 避免循环引用的问题<br>2 当对象被废弃后，会自动将指向它的弱引用变量置为nil。</p>
+</li>
+<li><p><strong>__autoreleasing</strong><br>则会将对象加入自动释放池，延长对象的释放时机,直到自动释放池释放掉的时候会做release操作。</p>
+</li>
+<li><p><strong>__unsafe_unretained</strong></p>
+<p>功能和__weak差不多，但是对象废弃后不会主动将指向废弃对象的变量置为nil,所以也比较危险，容易造成野指针错误。</p>
+</li>
+</ul>
+<p>大概介绍了这4中所有权修饰符，但是具体他们是怎么影响对象的释放的呢？<code>__weak</code>我们还比较常用，用于解决循环引用的问题，但是其他却很少见到，接下来举例说明。</p>
+<hr>
+<h3 id="对象的生成与释放"><a href="#对象的生成与释放" class="headerlink" title="对象的生成与释放"></a>对象的生成与释放</h3><p>[以对象何时生成，何时释放来理解内存管理是最让人印象深刻的。]</p>
+<p><em>以下例子为ARC环境</em></p>
+<h4 id="对象生成"><a href="#对象生成" class="headerlink" title="对象生成"></a>对象生成</h4><p>首先说下对象生成，对象的生成有两种类型： </p>
+<ol>
+<li>一种是自己生成。使用<code>alloc/init/new/copy/mutableCopy</code>方法生成的对象 就是自己生成的对象，自己生成的对象自己持有，如：<br><code>NSObject *obj = [[NSObject alloc] init];</code><br>obj持有了 自己生成的对象（自己生成的，不是obj生成的，有点绕）</li>
+<li>一种是非自己生成。除第一种中的方法返回的对象，都属于非自己生成，非自己生成的对象也能持有,如：<br><code>NSMutableArray *mArray = [NSMutableArray array];</code><br>编译器会检查方法名是否以<code>alloc/init/new/copy/mutableCopy</code>来区分，所以命名规范很重要。这两种方式生成的对象在内存管理有区别，后面具体说明。</li>
+</ol>
+<blockquote>
+<p>对象何时释放，引用计数为0的时候释放。（这不是废话，下面才是重点）</p>
+</blockquote>
+<h4 id="对象释放"><a href="#对象释放" class="headerlink" title="对象释放"></a>对象释放</h4><p>下面说明对象是如何释放的，直接按照所欲全修饰符一次说明：【具体实现原理，runtime源码中都有】</p>
+<ul>
+<li><strong>__strong修饰符</strong> </li>
+</ul>
+<p>修饰符是对象类型和id类型的对象默认修饰符，所以我们平时创的变量都是默认__strong修饰的。<br>如：</p>
+<blockquote>
+<p><code>NSObject *obj = [[NSObject alloc] init];</code><br>与下行等价<br><code>NSObject * __strong obj =  [[NSObject alloc] init];</code><br><code>id obj2;</code><br>与下行等价<br><code>id __strong obj2;</code>  </p>
+</blockquote>
+<p>所以在使用这些变量的时候就会触发相应对象的retain和release操作,如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (void)function&#123;</span><br><span class="line">	NSObject *obj = [[NSObject alloc] init];//#1</span><br><span class="line">	//和 NSObject * __strong obj = [[NSObject alloc] init]; 等价</span><br><span class="line">	//这里属于对象的第一种生成方式，由于obj默认为__strong修饰符，所以持有该自己生成的对象，该对象应用计数为1</span><br><span class="line">	</span><br><span class="line">	NSObject *obj2 = [[NSObject alloc] init];//#2</span><br><span class="line">	obj2 = obj;//#3</span><br><span class="line">	//这时obj2会retian新赋值的对象，relase旧对象，所以#2中自动生成的对象引用计数为0就会释放掉，而#1中生成的对象引用计数为2</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用<code>function</code>结束后，由于<code>obj</code>，<code>obj2</code> 超出了作用域，强引用实效，这时#1中生成的对象引用计数为0，就被废弃掉了。</p>
+<p>这里为何<code>obj</code>,<code>obj2</code>的强引用实效呢？<br>obj和obj2变量是分配在函数调用栈上的，而对象的生成是在堆上的，obj和obj2在栈上的地址存储着对应堆上对象的地址。当函数执行完后函数调用栈就会被释放，这是也就不存在obj和obj2变量了，强引用就实效，做release操作，导致堆中对象的引用计数为0，被系统回收。</p>
+<ul>
+<li><strong>__weak</strong>修饰符 </li>
+</ul>
+<p>同样的例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   NSObject * __weak obj = [[NSObject alloc] init];//#1</span><br><span class="line">   NSLog(@&quot;%@&quot;,obj);</span><br><span class="line">   //这里会打印null,因为方法自己生成对象后，并没有强引用变量持有，引用计数为0 后立刻就被废弃了。因为obj是弱引用,并不会改变对象的引用计数。</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果要自己生成的对象不被释放就必须先被强引用后在使用弱引用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">     NSObject * __strong obj = [[NSObject alloc] init];//#1</span><br><span class="line">     NSObject * __weak obj2 = obj;</span><br><span class="line">     NSLog(@&quot;%@&quot;, obj2); //不会为null</span><br><span class="line">&#125;//作用域结束后 局部变量obj被释放，强引用失效，#1处生成的对象引用计数为0，就被废弃掉了。</span><br></pre></td></tr></table></figure>
+<p>但是对于非自己生成的对象就有不一样的效果了：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@autoreleasepool&#123;</span><br><span class="line">  NSMutableArray * __weak arr = [NSMutabelArray array];//#1 自己生成的对象,被 __weak 指向</span><br><span class="line">  NSLog(@&quot;%@&quot;,arr); //会打印#1中生成对象的地址</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这段<code>@autoreleasepool</code>代码块中 由__weak的指向刚生成的对象没有被释放。当然一看就是<code>autoreleasepool</code>的作用，这也是为了强调autorelasepool才加上的，即使去掉<code>@autoreleasepool</code>执行结果也是一样的（在runloop启动、休眠、退出会有相应的新建和销毁<code>autoreleasepool</code> 具体请看博客）。<br>再进行以下改动：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">NSMutableArray * __weak array;</span><br><span class="line">@autoreleasepool &#123;</span><br><span class="line">    NSObject * __weak obj = [NSObject new];</span><br><span class="line">    NSLog(@&quot;%p&quot;,obj);</span><br><span class="line">    array = [NSMutableArray array];</span><br><span class="line">    NSLog(@&quot;%p&quot;,array);</span><br><span class="line">&#125;</span><br><span class="line"> NSLog(@&quot;%p&quot;,array);</span><br><span class="line"> </span><br><span class="line"> 这时打印结果如下：</span><br><span class="line"> [23348:10553020] 0x0</span><br><span class="line"> [23348:10553020] 0x600000d08b10</span><br><span class="line"> [23348:10553020] 0x0</span><br></pre></td></tr></table></figure>
+<p>发现对象在出<code>autoreleasepool</code>后就被释放了，所以可以说明非自己生成的对象就会被添加到<code>autoreleasepool</code>中，下面讲解<code>__autorelasing</code>时会说明。</p>
+<p>前面说了<code>__weak</code>两个功能，在给<code>__weak</code>变量赋值对象的时候，会将该变量添加到对象的<code>weak</code>变量表中（全局<code>hash</code>表，<code>key</code>是对象内存地址），当对象被废弃是，就会找到这个<code>weak</code>表，将其中所有变量置为<code>nil</code>（<strong>详情看<code>runtime</code>源码中的<code>weak</code>原理</strong>）。<br>以上都是给<code>__weak</code>变量赋值时候的例子，但是使用__weak变量又如何呢？如下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">id __weak obj = obj1;</span><br><span class="line">NSLog(@&quot;obj class:%@&quot;,[obj class]);</span><br><span class="line"></span><br><span class="line">其实和下面是等价的：</span><br><span class="line">id __weak obj = obj1;</span><br><span class="line">id __autoreleasing temp = obj1;</span><br><span class="line">NSLog(@&quot;obj class:%@&quot;,[temp class]);</span><br></pre></td></tr></table></figure>
+<p><mark>那么为何在使用<code>__weak</code>变量的时候要将对象将入到<code>autoreleasepool</code>中呢？因为<strong>weak修饰符只持有对象的弱应用，而在访问引用对象的过程中，该对象可能被废弃，如果要被访问对象注册到<code>autoreleasepool</code>中那么再<code>@autoreleasepool</code>块结束前都能够保持该对象存在。因此，在使用附有`</strong>weak<code>修复的变量时就必定要使用注册到</code>autoreleasepool<code>中的对象【引:</code>Objectiv-C<code>高级编程】&lt;mark&gt;。所以如果大量使用</code>__weak`修饰的变量时也会额外增加系统开销的。</mark></p>
+<ul>
+<li><strong>__autoreleasing`修饰符</strong> </li>
+</ul>
+<p>作用就是将对象加入到自动释放池中，上面已经出现过两种情况，一种是非自己生成的对象会加入到自动释放池，一种是使用<code>__weak</code>修饰的变量也会将对象加入自动释放池。当然显示的使用<code>__autoreleasing</code>也是可以的，如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">@autoreleasepool&#123;</span><br><span class="line">     id __autoreleasing obj = [NSObjec new];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的obj指向的对象就会被注册到当前的自动释放池中，自动释放池作用域结束后就对象就会被废弃。</p>
+<p>这里再来说说非自己生成的对象，看如下例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+(id)createAObject&#123;</span><br><span class="line">	 id obj = [[NSObject alloc] init];</span><br><span class="line">    return obj;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该方法中没有任何地方显示的使用<code>__autoreleasing</code>,<code>obj</code>变量函数超出作用域后也被注销，但是这时编译器会自动将这个返回值加入到当前自动释放池中，所以最终<code>obj</code>指向的对象在obj变量注销后并不会立即释放，这也是为何及时 「非自己生成对象」的函数返回的对象赋值给一个<code>__weak</code>对象不会立即被被废弃的原因。</p>
+<p>还有一个是常见的地方会隐式使用<code>__autoreleasing</code>的地方:对象的指针默认所有权修饰符就是<code>__autoreleasing</code>。如平时常用的获取NSError对象：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">NSError *error = nil;</span><br><span class="line">BOOL reuselt = [obj doSomethingWithError:&amp;error];</span><br><span class="line">doSomethingWithError方法定义如下：</span><br><span class="line">- (BOOL) doSomethingWithError:(NSError **error)&#123;</span><br><span class="line">	*error = [[NSError alloc] initWithDomain:SomeDomain code:errorCode userInfo:nil];</span><br><span class="line">	return YES;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的参数默认形式就: <code>NSError * __autoreleasing *error</code>. 像<code>id *obj、 NSObject ** obj2</code>对应与 <code>id __autoreleasing *obj、NSObject * __autoreleasing * obj2</code>等价。<br>注意在我们给对象指针赋值的时，所有权修饰符必须一致，不然编译器会报错：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NSError * err = nil;</span><br><span class="line">NSError ** pError = &amp;err; //报错 正确的应该是这样：NSError * __strong * pError = &amp;err;</span><br></pre></td></tr></table></figure>
+<p><code>__unsafe_unretained</code> 修复符这里就不做说明，使用该修复的对象不会被纳入系统的内存管理当中，使用时需要慎重考虑。</p>
+<blockquote>
+<p>参考：【Objective-C 高级编程】</p>
+</blockquote>
+
+    
+  </div>
+
+  
+      <div class="git"></div>
+  
+
+</article>
+
+
+   
+
+   
+  <div class="box-prev-next clearfix">
+    <a class="show pull-left" href="/2017/08/23/weak实现原理/">
+        <i class="icon icon-angle-left"></i>
+    </a>
+    <a class="show pull-right" href="/2018/08/12/Block的类型/">
+        <i class="icon icon-angle-right"></i>
+    </a>
+  </div>
+
+
+
+
+</div>
+
+
+  <a id="backTop" class="back-top">
+    <i class="icon-angle-up"></i>
+  </a>
+
+
+
+
+  <div class="modal" id="modal">
+  <span id="cover" class="cover hide"></span>
+  <div id="modal-dialog" class="modal-dialog hide-dialog">
+    <div class="modal-header">
+      <span id="close" class="btn-close">关闭</span>
+    </div>
+    <hr>
+    <div class="modal-body">
+      <ul class="list-toolbox">
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/archives/"
+              rel="noopener noreferrer"
+              target="_blank"
+              >
+              博客
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/category"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              分类
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/link/"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              友链
+            </a>
+          </li>
+        
+          <li class="item-toolbox">
+            <a
+              class="ROUND_RECT"
+              href="/about"
+              rel="noopener noreferrer"
+              target="_self"
+              >
+              关于
+            </a>
+          </li>
+        
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+
+
+  
+      <div class="fexo-comments comments-post">
+    
+  <section class="disqus-comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+  </section>
+
+  <script>
+    var disqus_shortname = 'kivan';
+    
+    var disqus_url = 'https://fanncyii.github.io/2018/05/04/iOS所有权修饰符看内存管理/';
+    
+    (function(){
+      var dsq = document.createElement('script');
+      dsq.type = 'text/javascript';
+      dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+
+  <script id="dsq-count-scr" src="//kivan.disqus.com/count.js" async></script>
+
+
+
+    
+    
+
+    
+    
+
+    
+
+    
+    
+
+    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
+    <div id="comment" class="vcomment" ></div>
+    <script>
+        var notify = 'false' == true ? true : false;
+        var verify = 'false' == true ? true : false;
+        var GUEST_INFO = ['nick','mail','link'];
+        var guest_info = 'nick,mail,link'.split(',').filter(function(item){
+            return GUEST_INFO.indexOf(item) > -1
+        });
+        guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+        window.valine = new Valine({
+            el: '.vcomment',
+            notify: notify,
+            verify: verify,
+            appId: "",
+            appKey: "",
+            avatar:'mm',
+            placeholder: "Just go go",
+            guest_info:guest_info,
+            pageSize:'10'
+        });
+    </script>
+  
+  </div>
+
+  
+
+  <script type="text/javascript">
+  function loadScript(url, callback) {
+    var script = document.createElement('script')
+    script.type = 'text/javascript';
+
+    if (script.readyState) { //IE
+      script.onreadystatechange = function() {
+        if (script.readyState == 'loaded' ||
+          script.readyState == 'complete') {
+          script.onreadystatechange = null;
+          callback();
+        }
+      };
+    } else { //Others
+      script.onload = function() {
+        callback();
+      };
+    }
+
+    script.src = url;
+    document.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  window.onload = function() {
+    loadScript('/js/bundle.js?235683', function() {
+      // load success
+    });
+  }
+</script>
+
+</body>
+</html>

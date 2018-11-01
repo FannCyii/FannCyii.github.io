@@ -15,17 +15,17 @@
     <meta name="keywords" content="程序员" />
   
 
-  <meta name="description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的变量都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
+  <meta name="description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的对象都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Block的类型">
 <meta property="og:url" content="https://fanncyii.github.io/2018/08/12/Block的类型/index.html">
 <meta property="og:site_name" content="时光荏苒">
-<meta property="og:description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的变量都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
+<meta property="og:description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的对象都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-08-12T14:54:56.608Z">
+<meta property="og:updated_time" content="2018-11-01T17:07:57.448Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Block的类型">
-<meta name="twitter:description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的变量都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
+<meta name="twitter:description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的对象都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
 
   
 
@@ -199,7 +199,7 @@
 </tr>
 </tbody>
 </table>
-<h2 id="1-栈中的Block"><a href="#1-栈中的Block" class="headerlink" title="1 栈中的Block"></a>1 栈中的Block</h2><p>由于<code>OC</code>的内存管理机制，其创建的变量都保存在堆上。如当进入一个函数栈时，函数中使用<code>[[NSObject alloc] init]</code>创建的对象不是存放在栈上的，而是存放在堆上的,函数结束后使用ARC等机制释放掉不在使用的对象。但是有个例外就是<code>Block</code>，<code>Block</code>对象也可以作为<code>OC</code>对象，但是在函数中创建并捕获了自动变量的Block是存放在栈上的。所以如果<code>block</code>存储在栈中，那么当函数结束时，该<code>block</code>就会和函数栈一起释放掉。这样如果是栈<code>Block</code>就不会产生循环引用了。这也是为什么使用<code>Masonry</code>设置约束时<code>Block</code>里面直接使用<code>self</code>而不会导致循环引用的原因。</p>
+<h2 id="1-栈中的Block"><a href="#1-栈中的Block" class="headerlink" title="1 栈中的Block"></a>1 栈中的Block</h2><p>由于<code>OC</code>的内存管理机制，其创建的对象都保存在堆上。如当进入一个函数栈时，函数中使用<code>[[NSObject alloc] init]</code>创建的对象不是存放在栈上的，而是存放在堆上的,函数结束后使用ARC等机制释放掉不再使用的对象。但是有个例外就是<code>Block</code>，<code>Block</code>对象也可以作为<code>OC</code>对象，但是在函数中创建并捕获了自动变量的Block是存放在栈上的。所以如果<code>block</code>存储在栈中，那么当函数结束时，该<code>block</code>就会和函数栈一起释放掉。这样如果是栈<code>Block</code>就不会产生循环引用了。这也是为什么使用<code>Masonry</code>设置约束时<code>Block</code>里面直接使用<code>self</code>而不会导致循环引用的原因。</p>
 <h2 id="2-全局Block"><a href="#2-全局Block" class="headerlink" title="2 全局Block"></a>2 全局Block</h2><p>什么时候生成的Block是存储在数据区的呢？有两种情况：  </p>
 <blockquote>
 <ul>
@@ -213,14 +213,14 @@
 <ul>
 <li>调用Block的copy实例方法时</li>
 <li>Block作为函数返回值时</li>
-<li>将Block赋值给附有_strong修饰符id类型或Block类型成员变量时（在ARC中类属性使用copy和strong都是一样的效果，只是苹果建议使用copy）</li>
+<li>将Block赋值给附有__strong修饰符id类型或Block类型成员变量时（在ARC中类属性使用copy和strong都是一样的效果，只是苹果建议使用copy）</li>
 <li>在方法名中有usingBlock的Cocoa框架方法或GCD的API中传递的Block时</li>
 </ul>
 </blockquote>
-<p>由于栈block和全局block入会形成循环引用，所以导致循环引用的也就是堆Block了。将Block存储在堆上也是为何Block能够超期存在的原因，也是循环引用的一个必要条件。</p>
+<p>由于栈block不会形成循环引用，所以导致循环引用的也就是堆Block了。将Block存储在堆上也是为何Block能够超期存在的原因，也是循环引用的一个必要条件。</p>
 <p>当使用<code>__block</code>修饰变量时，系统会开辟新的内存空间形成一个专门存储<code>__block</code>变量的结构体,而该结构体会强引用赋值给<code>__block</code>变量的对象，当<code>Block</code>被拷贝到堆上时，相关的<code>__block</code>也会被拷贝到堆上,所以这里也可能会引起循环引用。如下代码： </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">- (void)demoCycleReference</span><br><span class="line">&#123;</span><br><span class="line">    __block id tempSelf = self;</span><br><span class="line">    self.demoblock = ^&#123;</span><br><span class="line">        NSLog(@&quot;%@&quot;,tempSelf);</span><br><span class="line">        tempSelf = nil;</span><br><span class="line">    &#125;;</span><br><span class="line">    //self.demoblock()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里如果<code>self.demoblock()</code> 没有执行，那么就会导致循环引用,因为<code>__block</code>变量强引用了<code>tempself</code>对象，而block强引用<code>__block</code>变量，而<code>temself</code>又强引用了该<code>block</code>，最后导致引用循环。</p>
+<p>这里如果<code>self.demoblock()</code> 没有执行，那么就会导致循环引用,因为<code>__block</code>结构体（其实<code>__block</code>结构体重的<code>__forwarding</code>指针）强引用了<code>tempself</code>对象，而block强引用<code>__block</code>变量，而<code>temself</code>又强引用了该<code>block</code>，最后导致引用循环。</p>
 <blockquote>
 <p>参考：<br>Objective-C 高级编程<br><a href="https://github.com/100mango/zen/blob/master/Objective-C%20%E6%8B%BE%E9%81%97%EF%BC%9A%E4%BB%8EHeap%20and%20Stack%E5%88%B0Block%20/Objective-C%20%E6%8B%BE%E9%81%97%EF%BC%9A%E4%BB%8EHeap%20and%20Stack%E5%88%B0Block%20.md" target="_blank" rel="noopener">Objective-C 拾遗：从Heap and Stack到Block</a></p>
 </blockquote>
@@ -239,7 +239,7 @@
 
    
   <div class="box-prev-next clearfix">
-    <a class="show pull-left" href="/2017/08/23/weak实现原理/">
+    <a class="show pull-left" href="/2018/05/04/iOS所有权修饰符看内存管理/">
         <i class="icon icon-angle-left"></i>
     </a>
     <a class="hide pull-right" href="/">
