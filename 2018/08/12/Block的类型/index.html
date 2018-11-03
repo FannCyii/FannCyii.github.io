@@ -102,7 +102,7 @@
 <meta property="og:site_name" content="Kivan&#39;s Blogs">
 <meta property="og:description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的对象都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-11-03T04:08:05.206Z">
+<meta property="og:updated_time" content="2018-11-03T04:11:42.771Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Block的类型">
 <meta name="twitter:description" content="Block类型 存储位置       _NSConcreteStackBlock 栈   _NSConcreteGlobalBlock 数据区(.data)   _NSConcreteMallocBlock 堆    1 栈中的Block由于OC的内存管理机制，其创建的对象都保存在堆上。如当进入一个函数栈时，函数中使用[[NSObject alloc] init]创建的对象不是存放在栈上的，">
@@ -392,7 +392,7 @@
 <li>Block中并没有使用截获的自动变量的情况</li>
 </ul>
 </blockquote>
-<p>其实看着两种情况都是指的只要Block没有使用任何截获的变量，那么这个Block就存放在全局区，当然第一种情况就根本不会捕获到变量。<br>第二种情况，在使用clang -rewrite-objc 命令生成的.cpp文件中查看生成的是<code>_NSConcreteStackBlock</code>类型，但是在具体的ARC运行代码时查看确是<code>__NSGlobalBlock__</code>类型,所以应该没有截获自动变量的block是全局block应该是这里看出来的，例子：</p>
+<p>其实看着两种情况都是指的只要Block没有使用任何截获的变量，那么这个Block就存放在全局区，当然第一种情况就根本不会捕获到变量。<br>第二种情况，在使用clang -rewrite-objc 命令生成的.cpp文件中查看生成的是<code>_NSConcreteStackBlock</code>类型的block，但是在具体的ARC运行代码时查看尽然是<code>__NSGlobalBlock__</code>类型的,所以没有截获自动变量的block是全局block的结论可以在这里得出，例子：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">id __weak aBlock = ^&#123;</span><br><span class="line">    NSLog(@&quot;this is a globle block&quot;);</span><br><span class="line">&#125;;</span><br><span class="line">NSLog(@&quot;%@&quot;,aBlock);//打印结果 &lt;__NSGlobalBlock__: 0x10a73a1d8&gt;</span><br><span class="line">//aBlock并没有被释放，应为该变量指向的是一个全局block</span><br></pre></td></tr></table></figure>
 <h2 id="3-堆中的Block"><a href="#3-堆中的Block" class="headerlink" title="3 堆中的Block"></a>3 堆中的Block</h2><p>Block有一下情况就会拷贝到堆上</p>
 <blockquote>
