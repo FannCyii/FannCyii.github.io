@@ -102,7 +102,7 @@
 <meta property="og:site_name" content="Kivan&#39;s Blogs">
 <meta property="og:description" content="内存管理   iOS内存管理主要使用的是引用计数机制，当分配的对象引用计数为0时就会被系统回收。分为MRC和ARC(手动管理引用计数 和 自动引用计数)，现在大多使用ARC。    那么分配的对象何时引用计数为0呢？这就需要了解引用计数和对象生成和释放的关系了。要注意某对象的引用计数是根据持有者的数量来看的，当某对象存持有者有n个时，那么它的引用计数就为n,当某个变量需要持有该段对象时，该内存引用">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-11-03T03:28:38.751Z">
+<meta property="og:updated_time" content="2018-11-03T04:09:21.143Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="从iOS所有权修饰符看内存管理">
 <meta name="twitter:description" content="内存管理   iOS内存管理主要使用的是引用计数机制，当分配的对象引用计数为0时就会被系统回收。分为MRC和ARC(手动管理引用计数 和 自动引用计数)，现在大多使用ARC。    那么分配的对象何时引用计数为0呢？这就需要了解引用计数和对象生成和释放的关系了。要注意某对象的引用计数是根据持有者的数量来看的，当某对象存持有者有n个时，那么它的引用计数就为n,当某个变量需要持有该段对象时，该内存引用">
@@ -396,7 +396,7 @@
 <blockquote>
 <p>对象何时释放，引用计数为0的时候释放。（这不是废话，下面才是重点）</p>
 </blockquote>
-<h4 id="对象释放"><a href="#对象释放" class="headerlink" title="对象释放"></a>对象释放</h4><p>下面说明对象是如何释放的，直接按照所欲全修饰符一次说明：【具体实现原理，runtime源码中都有】</p>
+<h4 id="对象释放"><a href="#对象释放" class="headerlink" title="对象释放"></a>对象释放</h4><p>下面说明对象是如何释放的，直接按照所有权修饰符依次说明：【具体实现原理，runtime源码中都有】</p>
 <ul>
 <li><strong>__strong修饰符</strong> </li>
 </ul>
