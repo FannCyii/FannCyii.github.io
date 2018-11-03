@@ -1,183 +1,368 @@
 <!DOCTYPE html>
 
 
-  <html class="light page-post">
+
+  
 
 
+<html class="theme-next muse use-motion" lang="zh-Hans">
 <head>
-  <meta charset="utf-8">
-  
-  <title>weak实现原理 | 时光荏苒</title>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   
-    <meta name="keywords" content="程序员" />
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
   
 
-  <meta name="description" content="概要初始化weak变量的时候会调用storeWeak，后会先在全局哈希表SideTables（邻接表）中找到该变量指针指向的对象的weak_table_t 再通过weak_table_t获取对应该对象的若引用表实体weak_entry_t（每个weak_entry_t都包含对象地址和对应该对象的弱引用表），之后会释放删除旧对象的弱引用表中的变量指针，并在新对象的弱引用表中注册该变量指针。而对象释放">
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="笔记,原理," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/themeimages/longmao.jpg?v=5.1.2" />
+
+
+
+
+
+
+<meta name="description" content="概要初始化weak变量的时候会调用storeWeak，后会先在全局哈希表SideTables（邻接表）中找到该变量指针指向的对象的weak_table_t 再通过weak_table_t获取对应该对象的若引用表实体weak_entry_t（每个weak_entry_t都包含对象地址和对应该对象的弱引用表），之后会释放删除旧对象的弱引用表中的变量指针，并在新对象的弱引用表中注册该变量指针。而对象释放">
+<meta name="keywords" content="笔记,原理">
 <meta property="og:type" content="article">
 <meta property="og:title" content="weak实现原理">
 <meta property="og:url" content="https://fanncyii.github.io/2017/08/23/weak实现原理/index.html">
-<meta property="og:site_name" content="时光荏苒">
+<meta property="og:site_name" content="Kivan&#39;s Blogs">
 <meta property="og:description" content="概要初始化weak变量的时候会调用storeWeak，后会先在全局哈希表SideTables（邻接表）中找到该变量指针指向的对象的weak_table_t 再通过weak_table_t获取对应该对象的若引用表实体weak_entry_t（每个weak_entry_t都包含对象地址和对应该对象的弱引用表），之后会释放删除旧对象的弱引用表中的变量指针，并在新对象的弱引用表中注册该变量指针。而对象释放">
-<meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-07-22T01:21:05.055Z">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-03T03:28:46.662Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="weak实现原理">
 <meta name="twitter:description" content="概要初始化weak变量的时候会调用storeWeak，后会先在全局哈希表SideTables（邻接表）中找到该变量指针指向的对象的weak_table_t 再通过weak_table_t获取对应该对象的若引用表实体weak_entry_t（每个weak_entry_t都包含对象地址和对应该对象的弱引用表），之后会释放删除旧对象的弱引用表中的变量指针，并在新对象的弱引用表中注册该变量指针。而对象释放">
 
-  
-
-  
-    <link rel="icon" href="/longmao.ico">
-  
-
-  <link href="/css/styles.css?v=c114cbe6" rel="stylesheet">
 
 
-  
-    <link rel="stylesheet" href="/css/personal-style.css">
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://fanncyii.github.io/2017/08/23/weak实现原理/"/>
+
+
+
+
+
+  <title>weak实现原理 | Kivan's Blogs</title>
   
 
-  
-
-  
-
-  
 
 
-  
-    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-  
 
-  
-    <link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.3.0/css/font-awesome.min.css">
-  
+
+
+
+
+
+
+
+
+
+
 </head>
 
-<body>
-
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
 
   
-    <span id="toolbox-mobile" class="toolbox-mobile">To</span>
+  
+    
   
 
-  <div class="post-header CENTER">
-   
-  <div class="toolbox">
-    <a class="toolbox-entry" href="/">
-      <span class="toolbox-entry-text">To</span>
-      <i class="icon-angle-down"></i>
-      <i class="icon-home"></i>
-    </a>
-    <ul class="list-toolbox">
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Kivan's Blogs</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
       
-        <li class="item-toolbox">
-          <a
-            class="ROUND_RECT"
-            href="/archives/"
-            rel="noopener noreferrer"
-            target="_blank"
-            >
-            博客
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
           </a>
         </li>
       
-        <li class="item-toolbox">
-          <a
-            class="ROUND_RECT"
-            href="/category"
-            rel="noopener noreferrer"
-            target="_self"
-            >
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
             分类
           </a>
         </li>
       
-        <li class="item-toolbox">
-          <a
-            class="ROUND_RECT"
-            href="/link/"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            友链
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
           </a>
         </li>
       
-        <li class="item-toolbox">
-          <a
-            class="ROUND_RECT"
-            href="/about"
-            rel="noopener noreferrer"
-            target="_self"
-            >
-            关于
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
           </a>
         </li>
+      
+
       
     </ul>
-  </div>
+  
 
-
-</div>
-
-
-  <div id="toc" class="toc-article">
-    <strong class="toc-title">文章目录</strong>
-    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#概要"><span class="toc-text">概要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-相关的几个结构体"><span class="toc-text">1 相关的几个结构体</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-SideTable结构体"><span class="toc-text">1.1 SideTable结构体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-StripedMap类"><span class="toc-text">1.2 StripedMap类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-weak-table-t结构体"><span class="toc-text">1.3 weak_table_t结构体</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-weak-entry-t结构体"><span class="toc-text">1.4 weak_entry_t结构体</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-weak弱引用处理流程"><span class="toc-text">2 weak弱引用处理流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-全局hash表的初始化"><span class="toc-text">2.1 全局hash表的初始化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-全局SideTables哈希表的使用"><span class="toc-text">2.2 全局SideTables哈希表的使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-弱引用的删除与注册"><span class="toc-text">2.3 弱引用的删除与注册</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-对象的释放"><span class="toc-text">2.4 对象的释放</span></a></li></ol></li></ol>
-  </div>
+  
+</nav>
 
 
 
-<div class="content content-post CENTER">
-   <article id="post-weak实现原理" class="article article-type-post" itemprop="blogPost">
-  <header class="article-header">
-    <h1 class="post-title">weak实现原理</h1>
+ </div>
+    </header>
 
-    <div class="article-meta">
-      <span>
-        <i class="icon-calendar"></i>
-        <span>2017.08.23</span>
-      </span>
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
-      
-        <span class="article-author">
-          <i class="icon-user"></i>
-          <span>Kivan</span>
-        </span>
-      
-
-      
-  <span class="article-category">
-    <i class="icon-list"></i>
-    <a class="article-category-link" href="/category/iOS/">iOS</a>
-  </span>
-
-
-
-      
-        <span>
-          <i class="icon-comment"></i>
-          <a href="https://fanncyii.github.io//2017/08/23/weak实现原理/#disqus_thread"></a>
-        </span>
-      
-
-      
-      <i class="fa fa-eye"></i> 
-        <span id="busuanzi_container_page_pv">
-           &nbsp热度 <span id="busuanzi_value_page_pv">
-           <i class="fa fa-spinner fa-spin"></i></span>℃
-        </span>
-      
-      
-    </div>
-  </header>
-
-  <div class="article-content">
+  <div id="posts" class="posts-expand">
     
-      <h2 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h2><p>初始化<code>weak</code>变量的时候会调用<code>storeWeak</code>，后会先在全局哈希表<code>SideTables</code>（邻接表）中找到该变量指针指向的对象的<code>weak_table_t</code> 再通过<code>weak_table_t</code>获取对应该对象的若引用表实体<code>weak_entry_t</code>（每个<code>weak_entry_t</code>都包含对象地址和对应该对象的弱引用表），之后会释放删除旧对象的弱引用表中的变量指针，并在新对象的弱引用表中注册该变量指针。而对象释放的时候也会调用调用<code>storeWeak</code>，只是传入的新对象值是<code>nil</code>。</p>
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://fanncyii.github.io/2017/08/23/weak实现原理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Kivan">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/longmao.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kivan's Blogs">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">weak实现原理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-23T00:34:11+08:00">
+                2017-08-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/category/iOS/" itemprop="url" rel="index">
+                    <span itemprop="name">iOS</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h2><p>初始化<code>weak</code>变量的时候会调用<code>storeWeak</code>，后会先在全局哈希表<code>SideTables</code>（邻接表）中找到该变量指针指向的对象的<code>weak_table_t</code> 再通过<code>weak_table_t</code>获取对应该对象的若引用表实体<code>weak_entry_t</code>（每个<code>weak_entry_t</code>都包含对象地址和对应该对象的弱引用表），之后会释放删除旧对象的弱引用表中的变量指针，并在新对象的弱引用表中注册该变量指针。而对象释放的时候也会调用调用<code>storeWeak</code>，只是传入的新对象值是<code>nil</code>。</p>
 <p>下面详细讲解</p>
 <h2 id="1-相关的几个结构体"><a href="#1-相关的几个结构体" class="headerlink" title="1 相关的几个结构体"></a>1 相关的几个结构体</h2><h3 id="1-1-SideTable结构体"><a href="#1-1-SideTable结构体" class="headerlink" title="1.1 SideTable结构体"></a>1.1 <code>SideTable</code>结构体</h3><p><code>SideTable</code>用于实现全局hash表<code>SideTables</code>。SideTable结构体包含一个 <del>自旋锁</del>（看变量名称是自选锁，但是底层是另一个锁<code>os_unfair_lock_s</code>）、引用计数表、weak表。结构体的构造函数分配了内存空间。其实在runtime加载到内存后就是初始化一个定长的SideTable数组（StripedMap），数组中每个值都指向一个链表，用于全局存储弱引用表相关的数据，就是一个邻接表的结构。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">struct SideTable &#123;</span><br><span class="line">    spinlock_t slock;</span><br><span class="line">    RefcountMap refcnts;</span><br><span class="line">    weak_table_t weak_table;</span><br><span class="line"></span><br><span class="line">    SideTable() &#123;</span><br><span class="line">        memset(&amp;weak_table, 0, sizeof(weak_table));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ~SideTable() &#123;</span><br><span class="line">        _objc_fatal(&quot;Do not delete SideTable.&quot;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    void lock() &#123; slock.lock(); &#125;</span><br><span class="line">    void unlock() &#123; slock.unlock(); &#125;</span><br><span class="line">    void forceReset() &#123; slock.forceReset(); &#125;</span><br><span class="line"></span><br><span class="line">    // Address-ordered lock discipline for a pair of side tables.</span><br><span class="line"></span><br><span class="line">    template&lt;HaveOld, HaveNew&gt;</span><br><span class="line">    static void lockTwo(SideTable *lock1, SideTable *lock2);</span><br><span class="line">    template&lt;HaveOld, HaveNew&gt;</span><br><span class="line">    static void unlockTwo(SideTable *lock1, SideTable *lock2);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
 <h3 id="1-2-StripedMap类"><a href="#1-2-StripedMap类" class="headerlink" title="1.2 StripedMap类"></a>1.2 <code>StripedMap</code>类</h3><p>查看StripedMap类的部分代码如下，该类在初始化的时候回定义一个定长为StripeCount的数组，数组的每一个item值类型为出入的模板值类型T。最终数据也是存储在这个array数组中。<br>重点看重载的<code>[]</code>运算符函数：<code>T&amp; operator[] (const void *p)</code>，使用对象内存地址为key获取map中的值的时候(类似<code>xxxx[obj]</code>的方式),就会调用<code>[]</code>运算符,运算符会通过indexForPointer方法对对象的内存地址进行各种位运算以及取模，最终获得一个索引值，用这个索引值来获取array中的值。  </p>
@@ -229,198 +414,385 @@
 <p>就酱，好记性不如烂笔头，加油</p>
 </blockquote>
 
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/笔记/" rel="tag"># 笔记</a>
+          
+            <a href="/tags/原理/" rel="tag"># 原理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/23/AutoReleasePool实现原理/" rel="next" title="AutoReleasePool实现原理">
+                <i class="fa fa-chevron-left"></i> AutoReleasePool实现原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/04/iOS所有权修饰符看内存管理/" rel="prev" title="从iOS所有权修饰符看内存管理">
+                从iOS所有权修饰符看内存管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
     
   </div>
 
+
+        </div>
+        
+          
   
-      <div class="git"></div>
-  
-
-</article>
-
-
-   
-
-   
-  <div class="box-prev-next clearfix">
-    <a class="show pull-left" href="/2017/07/23/AutoReleasePool实现原理/">
-        <i class="icon icon-angle-left"></i>
-    </a>
-    <a class="show pull-right" href="/2018/05/04/iOS所有权修饰符看内存管理/">
-        <i class="icon icon-angle-right"></i>
-    </a>
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
   </div>
 
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/longmao.jpg"
+               alt="Kivan" />
+          <p class="site-author-name" itemprop="name">Kivan</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/FannCyii" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                    
+                      GitHub
+                    
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-block">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="https://xiaobazhang.github.io" title="Xiaobazhang" target="_blank">Xiaobazhang</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+        
 
 
+      </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概要"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-相关的几个结构体"><span class="nav-number">2.</span> <span class="nav-text">1 相关的几个结构体</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-SideTable结构体"><span class="nav-number">2.1.</span> <span class="nav-text">1.1 SideTable结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-StripedMap类"><span class="nav-number">2.2.</span> <span class="nav-text">1.2 StripedMap类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-weak-table-t结构体"><span class="nav-number">2.3.</span> <span class="nav-text">1.3 weak_table_t结构体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-weak-entry-t结构体"><span class="nav-number">2.4.</span> <span class="nav-text">1.4 weak_entry_t结构体</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-weak弱引用处理流程"><span class="nav-number">3.</span> <span class="nav-text">2 weak弱引用处理流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-全局hash表的初始化"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 全局hash表的初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-全局SideTables哈希表的使用"><span class="nav-number">3.2.</span> <span class="nav-text">2.2 全局SideTables哈希表的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-弱引用的删除与注册"><span class="nav-number">3.3.</span> <span class="nav-text">2.3 弱引用的删除与注册</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-对象的释放"><span class="nav-number">3.4.</span> <span class="nav-text">2.4 对象的释放</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kivan</span>
 </div>
 
 
-  <a id="backTop" class="back-top">
-    <i class="icon-angle-up"></i>
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
   </a>
-
-
-
-
-  <div class="modal" id="modal">
-  <span id="cover" class="cover hide"></span>
-  <div id="modal-dialog" class="modal-dialog hide-dialog">
-    <div class="modal-header">
-      <span id="close" class="btn-close">关闭</span>
-    </div>
-    <hr>
-    <div class="modal-body">
-      <ul class="list-toolbox">
-        
-          <li class="item-toolbox">
-            <a
-              class="ROUND_RECT"
-              href="/archives/"
-              rel="noopener noreferrer"
-              target="_blank"
-              >
-              博客
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="ROUND_RECT"
-              href="/category"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              分类
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="ROUND_RECT"
-              href="/link/"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              友链
-            </a>
-          </li>
-        
-          <li class="item-toolbox">
-            <a
-              class="ROUND_RECT"
-              href="/about"
-              rel="noopener noreferrer"
-              target="_self"
-              >
-              关于
-            </a>
-          </li>
-        
-      </ul>
-
-    </div>
-  </div>
 </div>
 
 
+        
 
-  
-      <div class="fexo-comments comments-post">
-    
-  <section class="disqus-comments">
-    <div id="disqus_thread">
-      <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-    </div>
-  </section>
-
-  <script>
-    var disqus_shortname = 'kivan';
-    
-    var disqus_url = 'https://fanncyii.github.io/2017/08/23/weak实现原理/';
-    
-    (function(){
-      var dsq = document.createElement('script');
-      dsq.type = 'text/javascript';
-      dsq.async = true;
-      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-  </script>
-
-  <script id="dsq-count-scr" src="//kivan.disqus.com/count.js" async></script>
-
-
+        
+      </div>
+    </footer>
 
     
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
     
 
-    
-    
-
-    
-
-    
-    
-
-    <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
-    <script src="//unpkg.com/valine@latest/dist/Valine.min.js"></script>
-    <div id="comment" class="vcomment" ></div>
-    <script>
-        var notify = 'false' == true ? true : false;
-        var verify = 'false' == true ? true : false;
-        var GUEST_INFO = ['nick','mail','link'];
-        var guest_info = 'nick,mail,link'.split(',').filter(function(item){
-            return GUEST_INFO.indexOf(item) > -1
-        });
-        guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
-        window.valine = new Valine({
-            el: '.vcomment',
-            notify: notify,
-            verify: verify,
-            appId: "",
-            appKey: "",
-            avatar:'mm',
-            placeholder: "Just go go",
-            guest_info:guest_info,
-            pageSize:'10'
-        });
-    </script>
-  
   </div>
 
   
 
-  <script type="text/javascript">
-  function loadScript(url, callback) {
-    var script = document.createElement('script')
-    script.type = 'text/javascript';
-
-    if (script.readyState) { //IE
-      script.onreadystatechange = function() {
-        if (script.readyState == 'loaded' ||
-          script.readyState == 'complete') {
-          script.onreadystatechange = null;
-          callback();
-        }
-      };
-    } else { //Others
-      script.onload = function() {
-        callback();
-      };
-    }
-
-    script.src = url;
-    document.getElementsByTagName('head')[0].appendChild(script);
-  }
-
-  window.onload = function() {
-    loadScript('/js/bundle.js?235683', function() {
-      // load success
-    });
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
   }
 </script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.2"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.2"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
 
 </body>
 </html>
